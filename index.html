@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Find Your Scent Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --cream:#FBF6FB; --ink:#3A2E4D; --card:#F5EAF9; --line:#E4D2ED;
+    --rose:#E0729E; --pink:#F6AFD1; --blue:#A9D2EC; --purple:#B79BE3; --lavender:#D5C3EE;
+    --citrus:#D9812E; --berry:#C9527B; --gourmet:#9C6B33; --aqua:#3F9E97; --milk:#9C8FC4; --water:#A9D2EC;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --cream:#1E1526; --ink:#F3E8FA; --card:#2A1F38; --line:#4A3960; }
+  }
+  :root[data-theme="dark"]{ --cream:#1E1526; --ink:#F3E8FA; --card:#2A1F38; --line:#4A3960; }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;position:relative;overflow-x:hidden;}
+
+  .amb{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .amb span{position:absolute;border-radius:50%;filter:blur(60px);opacity:.3;transition:background 1.2s ease;}
+  .amb span:nth-child(1){width:340px;height:340px;top:-80px;left:-60px;background:var(--pink);animation:drift1 22s ease-in-out infinite;}
+  .amb span:nth-child(2){width:300px;height:300px;bottom:-100px;right:-60px;background:var(--purple);animation:drift2 26s ease-in-out infinite;}
+  .amb span:nth-child(3){width:260px;height:260px;bottom:20%;left:10%;background:var(--blue);animation:drift3 30s ease-in-out infinite;}
+  .amb span:nth-child(4){width:280px;height:280px;top:30%;right:5%;background:var(--lavender);animation:drift2 24s ease-in-out infinite reverse;}
+  @keyframes drift1{0%,100%{transform:translate(0,0);}50%{transform:translate(40px,50px);}}
+  @keyframes drift2{0%,100%{transform:translate(0,0);}50%{transform:translate(-50px,-30px);}}
+  @keyframes drift3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-40px) scale(1.1);}}
+  @media (prefers-reduced-motion: reduce){ .amb span{animation:none;} }
+
+  .particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .particle{position:absolute;will-change:transform,opacity;}
+  .p-bubble{border-radius:50%;border:1.5px solid rgba(255,255,255,.6);background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.6), transparent 65%);animation-name:pBubble;animation-timing-function:ease-in-out;animation-fill-mode:forwards;}
+  .p-droplet{border-radius:50% 50% 50% 0;transform:rotate(45deg);opacity:.55;background:var(--water);animation-name:pDroplet;animation-timing-function:ease-in;animation-fill-mode:forwards;}
+  .p-foam{border-radius:50%;background:rgba(255,255,255,.8);filter:blur(.5px);animation-name:pFoam;animation-timing-function:ease-out;animation-fill-mode:forwards;}
+  .p-petal{border-radius:50%;animation-name:pPetal;animation-timing-function:linear;animation-fill-mode:forwards;}
+  .p-steam{border-radius:50%;filter:blur(9px);background:rgba(255,255,255,.3);animation-name:pSteam;animation-timing-function:ease-out;animation-fill-mode:forwards;}
+  @keyframes pBubble{0%{transform:translate(0,10vh) scale(.7);opacity:0;}12%{opacity:.85;}100%{transform:translate(var(--dx,20px),-115vh) scale(1.15);opacity:0;}}
+  @keyframes pDroplet{0%{transform:translateY(-10vh) rotate(45deg);opacity:0;}10%{opacity:.6;}100%{transform:translateY(115vh) rotate(45deg);opacity:0;}}
+  @keyframes pFoam{0%{transform:translateY(15vh) scale(.5);opacity:0;}20%{opacity:.85;}100%{transform:translateY(-40vh) scale(1.3);opacity:0;}}
+  @keyframes pPetal{0%{transform:translate(0,-10vh) rotate(0deg);opacity:0;}15%{opacity:.7;}100%{transform:translate(var(--dx,-40px),115vh) rotate(220deg);opacity:0;}}
+  @keyframes pSteam{0%{transform:translateY(20vh) scale(.7);opacity:0;}30%{opacity:.45;}100%{transform:translateY(-70vh) scale(1.4);opacity:0;}}
+  @media (prefers-reduced-motion: reduce){ .particle{display:none;} }
+
+  .stage{position:relative;z-index:1;display:none;min-height:100vh;align-items:center;justify-content:center;flex-direction:column;padding:48px 24px;text-align:center;opacity:0;transform:translateY(10px);}
+  .stage.active{display:flex;animation:rise .55s ease forwards;}
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){ .stage.active{animation:none;opacity:1;transform:none;} }
+
+  h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;margin:0 0 16px;}
+  h1{font-size:clamp(26px,4.2vw,38px);max-width:16ch;}
+  h2{font-size:clamp(20px,3vw,26px);}
+  p{color:color-mix(in srgb, var(--ink) 72%, transparent);max-width:44ch;margin:0 0 28px;}
+  button{font-family:'Inter',sans-serif;cursor:pointer;border:none;}
+  .btn{background:var(--rose);color:#fff;padding:14px 32px;border-radius:999px;font-size:15px;font-weight:600;box-shadow:0 8px 22px -10px color-mix(in srgb, var(--rose) 70%, transparent);transition:opacity .15s,transform .15s;}
+  .btn:hover{opacity:.9;transform:translateY(-2px);}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);box-shadow:none;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:440px;width:100%;}
+  .opt{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 14px 18px 34px;font-size:14px;color:var(--ink);text-align:left;transition:border-color .15s,transform .15s,box-shadow .15s;}
+  .opt::before{content:"";position:absolute;left:14px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;background:var(--dot,var(--line));opacity:.7;}
+  .opt:hover{border-color:var(--rose);transform:translateY(-2px);box-shadow:0 10px 24px -16px rgba(0,0,0,.35);}
+  .dots{display:flex;gap:8px;margin-bottom:28px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .3s,transform .3s;}
+  .dot.on{background:var(--rose);transform:scale(1.3);}
+
+  .bloom{width:130px;height:130px;margin:0 auto 26px;filter:drop-shadow(0 12px 20px rgba(0,0,0,.12));}
+  .bloom .petal{transform-origin:70px 70px;animation:sway 4s ease-in-out infinite;}
+  .bloom .petal:nth-child(2){animation-delay:.3s;}
+  .bloom .petal:nth-child(3){animation-delay:.6s;}
+  .bloom .petal:nth-child(4){animation-delay:.9s;}
+  @keyframes sway{0%,100%{transform:rotate(0deg) scale(1);}50%{transform:rotate(6deg) scale(1.03);}}
+  .spark{animation:float 3.5s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(-10px);opacity:1;}}
+  @media (prefers-reduced-motion: reduce){ .bloom .petal,.spark{animation:none;} }
+
+  .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:38px 30px;max-width:420px;width:100%;margin:0 auto 20px;box-shadow:0 24px 50px -30px rgba(0,0,0,.28);overflow:hidden;}
+  .card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 0%, var(--accent,var(--rose)), transparent 55%);opacity:.16;pointer-events:none;}
+  .card .bloom{width:96px;height:96px;position:relative;z-index:1;}
+  .story{position:relative;z-index:1;font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:18px;line-height:1.7;margin:0 0 22px;color:var(--ink);}
+  .match{position:relative;z-index:1;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent,var(--rose));font-weight:600;margin-bottom:4px;}
+  .match-name{position:relative;z-index:1;font-family:'Fraunces',Georgia,serif;font-size:22px;margin:0 0 10px;}
+  .match-why{position:relative;z-index:1;font-size:14px;color:var(--ink);opacity:.72;margin:0;}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+  .brand{position:relative;z-index:1;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);opacity:.55;margin-top:22px;}
+
+  .loader{display:flex;gap:12px;margin-bottom:22px;}
+  .loader span{width:18px;height:18px;border-radius:50%;background:var(--rose);animation:loaderBounce 1s ease-in-out infinite;}
+  .loader span:nth-child(2){background:var(--purple);animation-delay:.15s;}
+  .loader span:nth-child(3){background:var(--blue);animation-delay:.3s;}
+  @keyframes loaderBounce{0%,80%,100%{transform:translateY(0) scale(1);opacity:.55;}40%{transform:translateY(-16px) scale(1.15);opacity:1;}}
+  @media (prefers-reduced-motion: reduce){ .loader span{animation:none;opacity:.85;} }
+
+  .music-toggle{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:16px;z-index:5;width:44px;height:44px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:18px;box-shadow:0 6px 16px -8px rgba(0,0,0,.3);}
+  #wait-text{transition:opacity .2s ease;}
+</style>
+</head>
+<body>
+<button class="music-toggle" id="music-btn" onclick="toggleMusic()" aria-label="Toggle background music">🔈</button>
+<div class="amb"><span></span><span></span><span></span><span></span></div>
+<div class="particles" id="particles"></div>
+
+<div class="stage active" id="s-hook">
+  <h1>Close your eyes.<br>What does home smell like?</h1>
+  <p>A few small choices, one story that's yours — and a scent to match it.</p>
+  <button class="btn" onclick="goTo('s-q')">Begin</button>
+</div>
+
+<div class="stage" id="s-q">
+  <div class="dots" id="dots"></div>
+  <h2 id="q-text"></h2>
+  <div class="options" id="q-opts"></div>
+</div>
+
+<div class="stage" id="s-wait">
+  <div class="loader" aria-hidden="true"><span></span><span></span><span></span></div>
+  <p id="wait-text">Reading your scent memory…</p>
+</div>
+
+<div class="stage" id="s-reveal">
+  <div class="card" id="share-card">
+    <div id="reveal-bloom"></div>
+    <p class="story" id="story-text"></p>
+    <div class="match" id="match-tag"></div>
+    <div class="match-name" id="match-name"></div>
+    <p class="match-why" id="match-why"></p>
+    <div class="brand">Fiama · Japanese Hokkaido Milk</div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="dl-btn" onclick="download()">Download your card</button>
+    <button class="btn ghost" onclick="restart()">Start again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {q:"What's your shower really about, most days?", opts:[
+    {l:"Waking up and feeling sharp", v:"wake", mood:"aqua"},
+    {l:"Washing off a day out in the sun", v:"sun", mood:"citrus"},
+    {l:"A slow, indulgent reset", v:"slow", mood:"gourmet"},
+    {l:"Evening out something that's felt off lately", v:"even", mood:"berry"},
+    {l:"Just wanting to feel taken care of", v:"care", mood:"milk"}]},
+  {q:"Pick a fragrance mood", opts:[
+    {l:"Punchy grapefruit", v:"grapefruit", mood:"citrus"},
+    {l:"Sweet raspberry", v:"raspberry", mood:"berry"},
+    {l:"Rich & gourmet", v:"gourmet", mood:"gourmet"},
+    {l:"Clean, refreshing aqua", v:"aqua", mood:"aqua"},
+    {l:"Soft milk & berries", v:"milk", mood:"milk"}]},
+  {q:"What's been bothering your skin lately?", opts:[
+    {l:"Tan that won't fade", v:"tan", mood:"citrus"},
+    {l:"Dullness, uneven tone", v:"dull", mood:"berry"},
+    {l:"Rough or bumpy patches", v:"bumpy", mood:"aqua"},
+    {l:"Tightness after washing", v:"tight", mood:"milk"},
+    {l:"Wanting an intense weekly reset", v:"reset", mood:"gourmet"}]},
+  {q:"When you exfoliate, what are you really after?", opts:[
+    {l:"A gentle, everyday wash-away", v:"gentle", mood:"citrus"},
+    {l:"A deep resurfacing treatment", v:"deep", mood:"gourmet"},
+    {l:"Smoothing rough bumps, gently", v:"smooth", mood:"aqua"},
+    {l:"Evening out tone over time", v:"overtime", mood:"berry"},
+    {l:"I'd rather just moisturize and protect", v:"protect", mood:"milk"}]},
+  {q:"Pick the season that feels most like you", opts:[
+    {l:"Peak summer", v:"summer", mood:"citrus"},
+    {l:"Early spring", v:"spring", mood:"berry"},
+    {l:"Festive, indulgent evenings", v:"festive", mood:"gourmet"},
+    {l:"Monsoon", v:"monsoon", mood:"aqua"},
+    {l:"Winter mornings", v:"winter", mood:"milk"}]},
+  {q:"How do you want your skin to feel after?", opts:[
+    {l:"Fresh and zesty", v:"zesty", mood:"citrus"},
+    {l:"Bright and even", v:"bright", mood:"berry"},
+    {l:"Pampered and renewed", v:"pampered", mood:"gourmet"},
+    {l:"Smooth, bump-free", v:"smoothfeel", mood:"aqua"},
+    {l:"Soft and moisturized", v:"soft", mood:"milk"}]}
+];
+
+const variants = {
+  citrus:{tag:"Your match", name:"4% Detan Serum Exfoliating Body Wash · Grapefruit",
+    why:"You want the tan gone without slowing down. 2% salicylic acid and 1% glycolic acid work into a punchy grapefruit lather that gently clears dead skin, every day."},
+  berry:{tag:"Your match", name:"3% Brightening Serum Body Wash · Raspberry Smoothie",
+    why:"You're chasing evenness, not drama. 2% niacinamide and omega 3 & 6 fold into a sweet raspberry wash that fights dullness, wash after wash."},
+  gourmet:{tag:"Your match", name:"Detan Body Scrub · Gourmet",
+    why:"You want the deep reset, not the daily grind. A 13% resurfacing blend with niacinamide and salicylic acid, in a rich gourmet scrub built for your slower ritual."},
+  aqua:{tag:"Your match", name:"Papain Body Scrub · Refreshing Aqua",
+    why:"You're after smooth, not just clean. Papain enzyme and caffeine gently polish away rough, bumpy texture in a cool aqua scrub that feels like waking up."},
+  milk:{tag:"Your match", name:"Skin Barrier Strengthening Moisturizing Soap Bar",
+    why:"You just want to feel cared for. Clinically proven pro-ceramides in Hokkaido milk and berries rebuild your skin barrier, leaving it soft with no stickiness."}
+};
+
+let answers = [], current = 0;
+const HEX = {citrus:'#D9812E', berry:'#C9527B', gourmet:'#9C6B33', aqua:'#3F9E97', milk:'#9C8FC4'};
+
+const Q_THEME = [
+  {type:'steam'},                       // 0 about your shower
+  {type:'petal', color:'#F6AFD1'},      // 1 fragrance mood — pastel pink
+  {type:'droplet'},                     // 2 skin concern
+  {type:'foam'},                        // 3 exfoliation
+  {type:'petal', color:'#B79BE3'},      // 4 season — purple
+  {type:'bubble'}                       // 5 final feel
+];
+
+let particleTimer = null;
+function clearParticles(){
+  if(particleTimer) clearInterval(particleTimer);
+  const c = document.getElementById('particles');
+  if(c) c.innerHTML = '';
+}
+function spawnParticles(theme, colorHex){
+  clearParticles();
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const container = document.getElementById('particles');
+  const cls = 'p-' + theme;
+  const spawn = ()=>{
+    if(container.children.length > 14) return;
+    const el = document.createElement('div');
+    el.className = 'particle ' + cls;
+    const base = theme==='steam' ? 30+Math.random()*30 : theme==='droplet' ? 6+Math.random()*6 : 8+Math.random()*16;
+    el.style.width = base + 'px';
+    el.style.height = (theme==='droplet' ? base*1.4 : base) + 'px';
+    el.style.left = (Math.random()*94) + '%';
+    el.style.setProperty('--dx', (Math.random()*80-40) + 'px');
+    const dur = theme==='droplet' ? 2 : theme==='steam' ? 7 : 5;
+    el.style.animationDuration = (dur + Math.random()*3) + 's';
+    if(colorHex && theme==='petal') el.style.background = colorHex;
+    container.appendChild(el);
+    el.addEventListener('animationend', ()=> el.remove());
+  };
+  spawn();
+  particleTimer = setInterval(spawn, 550);
+}
+
+function bloomSVG(hex, size){
+  const petal = (rot)=>`<ellipse class="petal" cx="70" cy="42" rx="20" ry="32" fill="${hex}" opacity=".85" transform="rotate(${rot} 70 70)"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 140 140" style="overflow:visible">
+    ${petal(0)}${petal(90)}${petal(180)}${petal(270)}
+    <circle cx="70" cy="70" r="16" fill="${hex}"/>
+    <circle class="spark" cx="20" cy="30" r="3" fill="${hex}" opacity=".6"/>
+    <circle class="spark" cx="118" cy="106" r="4" fill="${hex}" opacity=".5" style="animation-delay:1.2s"/>
+    <circle class="spark" cx="112" cy="24" r="2.5" fill="${hex}" opacity=".55" style="animation-delay:.6s"/>
+  </svg>`;
+}
+const waitLines = ["Reading your scent memory…","Mixing citrus with rain…","Untangling raspberry from rose…","Almost ready…"];
+let waitTimer = null;
+function startWaitCaptions(){
+  let i = 0;
+  const el = document.getElementById('wait-text');
+  el.textContent = waitLines[0];
+  waitTimer = setInterval(()=>{
+    i = (i+1) % waitLines.length;
+    el.style.opacity = 0;
+    setTimeout(()=>{ el.textContent = waitLines[i]; el.style.opacity = 1; }, 200);
+  }, 650);
+}
+function stopWaitCaptions(){ if(waitTimer) clearInterval(waitTimer); }
+
+function renderDots(){
+  document.getElementById('dots').innerHTML = questions.map((_,i)=>
+    `<div class="dot ${i<=current?'on':''}"></div>`).join('');
+}
+
+function renderQ(){
+  renderDots();
+  const q = questions[current];
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-opts').innerHTML = q.opts.map((o,i)=>
+    `<button class="opt" style="--dot:${HEX[o.mood]}" onclick="pick(${i})">${o.l}</button>`).join('');
+  const t = Q_THEME[current] || {type:'bubble'};
+  spawnParticles(t.type, t.color);
+}
+
+function pick(i){
+  const o = questions[current].opts[i];
+  answers.push(o);
+  current++;
+  if(current < questions.length){
+    renderQ();
+  } else {
+    goTo('s-wait');
+    setTimeout(()=>{ buildReveal(); goTo('s-reveal'); }, 5000);
+  }
+}
+
+function goTo(id){
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  stopWaitCaptions();
+  if(id==='s-q') renderQ();
+  else if(id==='s-hook') spawnParticles('bubble');
+  else if(id==='s-wait'){ spawnParticles('foam'); startWaitCaptions(); }
+  else if(id==='s-reveal') spawnParticles('bubble', document.documentElement.style.getPropertyValue('--accent'));
+}
+
+function buildReveal(){
+  const counts = {};
+  answers.forEach(a=> counts[a.mood] = (counts[a.mood]||0)+1);
+  const mood = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+  const v = variants[mood];
+
+  const about = answers[0];
+  const concern = answers[2];
+  const feel = answers[5];
+
+  document.documentElement.style.setProperty('--accent', HEX[mood]);
+  document.getElementById('reveal-bloom').outerHTML =
+    `<div class="bloom" id="reveal-bloom">${bloomSVG(HEX[mood],96)}</div>`;
+
+  const story = `Your showers are really about ${about.l.toLowerCase()}. Lately what's on your mind is ${concern.l.toLowerCase()}, and what you're chasing under the water is to feel ${feel.l.toLowerCase()}.`;
+  document.getElementById('story-text').textContent = story;
+  document.getElementById('match-tag').textContent = v.tag;
+  document.getElementById('match-name').textContent = v.name;
+  document.getElementById('match-why').textContent = v.why;
+}
+
+async function download(){
+  const btn = document.getElementById('dl-btn');
+  btn.textContent = 'Preparing…';
+  try{
+    const canvas = await html2canvas(document.getElementById('share-card'), {backgroundColor:null, scale:2});
+    const blob = await new Promise(res=>canvas.toBlob(res, 'image/png'));
+    if(!blob) throw new Error('no_blob');
+    if(!window.claude) throw new Error('no_runtime');
+    const downloads = await window.claude.use('downloads');
+    if(!downloads) throw new Error('unavailable');
+    await downloads.save({filename:'my-scent-story.png', data: blob});
+    btn.textContent = 'Saved!';
+    setTimeout(()=>{ btn.textContent = 'Download your card'; }, 2000);
+  } catch(err){
+    console.error('Download failed:', err);
+    btn.textContent = 'Download your card';
+    if(!err || err.code !== 'declined'){
+      alert('Sorry, the download didn\'t work. Try again, or take a screenshot instead.');
+    }
+  }
+}
+
+function restart(){
+  answers = []; current = 0;
+  goTo('s-hook');
+}
+
+spawnParticles('bubble');
+
+let audioCtx = null, musicOn = false, musicTimer = null;
+const SCALE = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // pentatonic, bubbly
+function playNote(freq){
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.09, t + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.55);
+}
+function toggleMusic(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    audioCtx = new AC();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  musicOn = !musicOn;
+  document.getElementById('music-btn').textContent = musicOn ? '🔊' : '🔈';
+  if(musicOn){
+    musicTimer = setInterval(()=>{
+      playNote(SCALE[Math.floor(Math.random()*SCALE.length)]);
+    }, 420);
+  } else {
+    clearInterval(musicTimer);
+  }
+}
+</script>
+</body>
+</html>
