@@ -132,7 +132,7 @@
     <div class="brand">Fiama · Japanese Hokkaido Milk</div>
   </div>
   <div class="actions">
-    <button class="btn" id="dl-btn" onclick="download()">Download your card</button>
+    <a class="btn" id="shop-btn" href="#" target="_blank" rel="noopener">Shop this on Amazon</a>
     <button class="btn ghost" onclick="restart()">Start again</button>
   </div>
 </div>
@@ -178,16 +178,21 @@ const questions = [
 ];
 
 const variants = {
-  citrus:{tag:"Your match", name:"4% Detan Serum Exfoliating Body Wash · Grapefruit",
-    why:"You want the tan gone without slowing down. 2% salicylic acid and 1% glycolic acid work into a punchy grapefruit lather that gently clears dead skin, every day."},
-  berry:{tag:"Your match", name:"3% Brightening Serum Body Wash · Raspberry Smoothie",
-    why:"You're chasing evenness, not drama. 2% niacinamide and omega 3 & 6 fold into a sweet raspberry wash that fights dullness, wash after wash."},
-  gourmet:{tag:"Your match", name:"Detan Body Scrub · Gourmet",
-    why:"You want the deep reset, not the daily grind. A 13% resurfacing blend with niacinamide and salicylic acid, in a rich gourmet scrub built for your slower ritual."},
-  aqua:{tag:"Your match", name:"Papain Body Scrub · Refreshing Aqua",
-    why:"You're after smooth, not just clean. Papain enzyme and caffeine gently polish away rough, bumpy texture in a cool aqua scrub that feels like waking up."},
-  milk:{tag:"Your match", name:"Skin Barrier Strengthening Moisturizing Soap Bar",
-    why:"You just want to feel cared for. Clinically proven pro-ceramides in Hokkaido milk and berries rebuild your skin barrier, leaving it soft with no stickiness."}
+ citrus:{tag:"Your match", name:"4% Detan Serum Exfoliating Body Wash · Grapefruit",
+    why:"You want the tan gone without slowing down. 2% salicylic acid and 1% glycolic acid work into a punchy grapefruit lather that gently clears dead skin, every day.",
+       shopUrl:"https://amzn.in/d/00nmXhLz"},
+ berry:{tag:"Your match", name:"3% Brightening Serum Body Wash · Raspberry Smoothie",
+    why:"You're chasing evenness, not drama. 2% niacinamide and omega 3 & 6 fold into a sweet raspberry wash that fights dullness, wash after wash.",
+       shopUrl:"https://amzn.in/d/0e68Cq6Y"},
+ gourmet:{tag:"Your match", name:"Detan Body Scrub · Gourmet",
+    why:"You want the deep reset, not the daily grind. A 13% resurfacing blend with niacinamide and salicylic acid, in a rich gourmet scrub built for your slower ritual.",
+       shopUrl:"https://amzn.in/d/0hpUtjP0"},
+ aqua:{tag:"Your match", name:"Papain Body Scrub · Refreshing Aqua",
+    why:"You're after smooth, not just clean. Papain enzyme and caffeine gently polish away rough, bumpy texture in a cool aqua scrub that feels like waking up.",
+        shopUrl:"https://amzn.in/d/01noRqfm"},
+ milk:{tag:"Your match", name:"Skin Barrier Strengthening Moisturizing Soap Bar",
+    why:"You just want to feel cared for. Clinically proven pro-ceramides in Hokkaido milk and berries rebuild your skin barrier, leaving it soft with no stickiness.",
+     shopUrl:"https://amzn.in/d/04hItMIU"}
 };
 
 let answers = [], current = 0;
@@ -312,29 +317,9 @@ function buildReveal(){
   document.getElementById('match-tag').textContent = v.tag;
   document.getElementById('match-name').textContent = v.name;
   document.getElementById('match-why').textContent = v.why;
+  document.getElementById('shop-btn').href = v.shopUrl;
 }
 
-async function download(){
-  const btn = document.getElementById('dl-btn');
-  btn.textContent = 'Preparing…';
-  try{
-    const canvas = await html2canvas(document.getElementById('share-card'), {backgroundColor:null, scale:2});
-    const blob = await new Promise(res=>canvas.toBlob(res, 'image/png'));
-    if(!blob) throw new Error('no_blob');
-    if(!window.claude) throw new Error('no_runtime');
-    const downloads = await window.claude.use('downloads');
-    if(!downloads) throw new Error('unavailable');
-    await downloads.save({filename:'my-scent-story.png', data: blob});
-    btn.textContent = 'Saved!';
-    setTimeout(()=>{ btn.textContent = 'Download your card'; }, 2000);
-  } catch(err){
-    console.error('Download failed:', err);
-    btn.textContent = 'Download your card';
-    if(!err || err.code !== 'declined'){
-      alert('Sorry, the download didn\'t work. Try again, or take a screenshot instead.');
-    }
-  }
-}
 
 function restart(){
   answers = []; current = 0;
