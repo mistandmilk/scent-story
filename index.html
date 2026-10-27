@@ -85,6 +85,7 @@
   .story{position:relative;z-index:1;font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:18px;line-height:1.7;margin:0 0 22px;color:var(--ink);}
   .match{position:relative;z-index:1;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent,var(--rose));font-weight:600;margin-bottom:4px;}
   .match-name{position:relative;z-index:1;font-family:'Fraunces',Georgia,serif;font-size:22px;margin:0 0 10px;}
+  .product-img{position:relative;z-index:1;display:block;width:100%;max-width:220px;height:auto;margin:0 auto 14px;border-radius:16px;}
   .match-why{position:relative;z-index:1;font-size:14px;color:var(--ink);opacity:.72;margin:0;}
   .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
   .brand{position:relative;z-index:1;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);opacity:.55;margin-top:22px;}
@@ -126,6 +127,7 @@
   <div class="card" id="share-card">
     <div id="reveal-bloom"></div>
     <p class="story" id="story-text"></p>
+    <img class="product-img" id="product-img" src="" alt="Your matched Fiama product">
     <div class="match" id="match-tag"></div>
     <div class="match-name" id="match-name"></div>
     <p class="match-why" id="match-why"></p>
@@ -180,19 +182,24 @@ const questions = [
 const variants = {
  citrus:{tag:"Your match", name:"4% Detan Serum Exfoliating Body Wash · Grapefruit",
     why:"You want the tan gone without slowing down. 2% salicylic acid and 1% glycolic acid work into a punchy grapefruit lather that gently clears dead skin, every day.",
-       shopUrl:"https://amzn.in/d/00nmXhLz"},
+       shopUrl:"https://amzn.in/d/00nmXhLz",
+image:"citrus.jpg"},
  berry:{tag:"Your match", name:"3% Brightening Serum Body Wash · Raspberry Smoothie",
     why:"You're chasing evenness, not drama. 2% niacinamide and omega 3 & 6 fold into a sweet raspberry wash that fights dullness, wash after wash.",
-       shopUrl:"https://amzn.in/d/0e68Cq6Y"},
+shopUrl:"https://amzn.in/d/0e68Cq6Y",
+image:"berry.jpg"},
  gourmet:{tag:"Your match", name:"Detan Body Scrub · Gourmet",
     why:"You want the deep reset, not the daily grind. A 13% resurfacing blend with niacinamide and salicylic acid, in a rich gourmet scrub built for your slower ritual.",
-       shopUrl:"https://amzn.in/d/0hpUtjP0"},
+       shopUrl:"https://amzn.in/d/0hpUtjP0",
+image:"gourmet.jpg"},
  aqua:{tag:"Your match", name:"Papain Body Scrub · Refreshing Aqua",
     why:"You're after smooth, not just clean. Papain enzyme and caffeine gently polish away rough, bumpy texture in a cool aqua scrub that feels like waking up.",
-        shopUrl:"https://amzn.in/d/01noRqfm"},
+        shopUrl:"https://amzn.in/d/01noRqfm",
+image:"aqua.jpg"},
  milk:{tag:"Your match", name:"Skin Barrier Strengthening Moisturizing Soap Bar",
     why:"You just want to feel cared for. Clinically proven pro-ceramides in Hokkaido milk and berries rebuild your skin barrier, leaving it soft with no stickiness.",
-     shopUrl:"https://amzn.in/d/04hItMIU"}
+     shopUrl:"https://amzn.in/d/04hItMIU",
+image:"milk.jpg"}
 };
 
 let answers = [], current = 0;
@@ -318,6 +325,7 @@ function buildReveal(){
   document.getElementById('match-name').textContent = v.name;
   document.getElementById('match-why').textContent = v.why;
   document.getElementById('shop-btn').href = v.shopUrl;
+  document.getElementById('product-img').src = v.image;
 }
 
 
