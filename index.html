@@ -140,6 +140,15 @@
 </div>
 
 <script>
+  const TRACK_URL = "https://script.google.com/macros/s/AKfycbxQQRZLqf-V7LtuQ0rDsun_f8MnTk093ZYrZI6OfUmnSaCGgQvnBIsXts9Xyv52tBvb/exec";
+function track(event, result) {
+  fetch(TRACK_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ event: event, result: result || "" })
+  }).catch(function () {});
+}
 const questions = [
   {q:"What's your shower really about, most days?", opts:[
     {l:"Waking up and feeling sharp", v:"wake", mood:"aqua"},
@@ -326,6 +335,8 @@ function buildReveal(){
   document.getElementById('match-why').textContent = v.why;
   document.getElementById('shop-btn').href = v.shopUrl;
   document.getElementById('product-img').src = v.image;
+    track("result", mood);
+    document.getElementById('shop-btn').onclick = function () { track("amazon_click", mood); };
 }
 
 
@@ -335,6 +346,7 @@ function restart(){
 }
 
 spawnParticles('bubble');
+  track("opened");
 
 let audioCtx = null, musicOn = false, musicTimer = null;
 const SCALE = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // pentatonic, bubbly
