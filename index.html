@@ -141,12 +141,17 @@
 
 <script>
   const TRACK_URL = "https://script.google.com/macros/s/AKfycbxQQRZLqf-V7LtuQ0rDsun_f8MnTk093ZYrZI6OfUmnSaCGgQvnBIsXts9Xyv52tBvb/exec";
+  let visitorId = "V-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+try {
+  const saved = localStorage.getItem("scentVisitor");
+  if (saved) { visitorId = saved; } else { localStorage.setItem("scentVisitor", visitorId); }
+} catch (e) {}
 function track(event, result) {
   fetch(TRACK_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ event: event, result: result || "" })
+    body: JSON.stringify({ visitor: visitorId, event: event, result: result || "" })
   }).catch(function () {});
 }
 const questions = [
